@@ -1,103 +1,59 @@
 # Research Question and Provisional Lane
 
-**Assignment:** ML-02 · Week 1 · Setup
+**Assignment:** ML-02 · Week 1
 **Author:** Emir Çabalak
-**Status:** Provisional — lane may be confirmed or changed by the end of Week 4.
+**Status:** Provisional; the lane may change by the end of Week 4.
 
----
+## Lane
 
-## 1. Provisional lane
+I'm going with **Lane 2, Refresh / Content Opportunity Scoring**. It's a core lane, not one of the advanced ones. The two advanced lanes stay mentor-gated for now, so I'm not touching them at this stage.
 
-**Lane 2 — Refresh / Content Opportunity Scoring** (one of the four core lanes).
+The reason is mostly that my Week-1 work already sits here. The starter pipeline produces a ranked refresh queue with reason codes and a Precision@K evaluation, and in notebook 02 I compared a hand rule (`stale × visible`) against a small decision tree on that exact task. So I already have a baseline, a metric, and a first observation. Sharpening the question the pipeline is already answering makes more sense than starting a different lane from scratch.
 
-I am *not* choosing an advanced / mentor-gated lane. For reference, the two advanced lanes
-(A1 — AI Referral Opportunity, A2 — Growth/Recovery/Momentum Prediction) require mentor approval
-of the data contract, validation plan, and public-output rules before any modeling; they are out
-of scope for this provisional framing.
+## Question
 
-Why Lane 2: my Week-1 run already lives here. The starter pipeline
-(`scripts/01`–`05`) produces a ranked refresh queue with reason codes and a Precision@K
-evaluation, and in `notebooks/02` I compared a transparent hand rule (`stale × visible`) against
-a small decision tree on that same task. So I already have a baseline, an evaluation metric, and a
-first observation to build on — the lazy, honest continuation is to sharpen the question this
-pipeline is already answering, rather than start a different lane from zero.
+> Among pages that are already visible in search, which ones should a content editor look at first for a refresh, so that limited editing time goes where it's most likely to matter?
 
-## 2. The question
+This is a prioritization problem, not a causal one. I'm ordering a worklist, not claiming that any signal moves rankings.
 
-> Among pages that are already **visible** in search, **which ones should a content editor
-> review first for a refresh** (update / expand / protect / prune / monitor), so that limited
-> editing time goes to the pages where a refresh is most likely to matter?
+## Unit of analysis
 
-This is a **prioritization / ranking** question, not a "does X cause Y" question.
+One content page over its recent performance window. The starter dataset gives me the 30- and 90-day columns; if the lane needs stronger time-window labels later I'll move to warehouse-shaped daily facts. One page in, one priority score out.
 
-## 3. Unit of analysis
+## Output
 
-One **content page** (`content_id`) over its trailing performance window (the 30/90-day
-columns in the starter dataset; warehouse-shaped daily facts later if the lane needs stronger
-time-window labels). One row in, one priority score out.
+A ranked review queue: page, priority score, suggested action, reason codes, confidence label. Structurally it's what the pipeline already writes to `outputs/refresh_queue.csv`, but with the question, the label, and the reason codes made explicit and defensible rather than implied.
 
-## 4. Output
+## The decision and the action
 
-A **ranked review queue**: page → priority score → suggested action → reason codes →
-confidence label. Concretely the shape the pipeline already emits in `outputs/refresh_queue.csv`,
-but with the question, label, and reason codes made explicit and defensible.
+The decision is which pages land at the top of an editor's weekly refresh list. The person acting on it is a content editor who can realistically review a handful of pages a week. They open the top of the queue and act on the reason code: refresh a stale but still-visible page, expand a thin one, protect a declining high-value one, or just keep watching. The score orders the queue. A human still decides page by page, and nothing is edited automatically.
 
-## 5. The decision this informs, and the action someone takes
+## Cost of being wrong
 
-- **Decision:** which pages land at the top of an editor's weekly refresh worklist.
-- **Actor:** a content editor / SEO owner with time to review only a handful of pages per week.
-- **Action:** open the top-ranked pages and act on the reason code — refresh a stale-but-visible
-  page, expand a thin one, protect a declining high-value one, or simply monitor. The score
-  orders the queue; it does not auto-edit anything. A human still decides per page.
+Editor time is the scarce resource, so the ordering is where the cost lives.
 
-## 6. Cost of a wrong recommendation
+Rank a page high when a refresh won't help, and you've burned review hours. Worse, re-editing a stable page can lose rankings it already had, so a bad "yes" isn't neutral. Bury a page that genuinely needed attention, and it declines quietly with nobody getting to it in time. Because the constraint is attention rather than accuracy, what matters most is Precision@K near the top of the list, not a global score.
 
-Getting this wrong is not free, which is exactly why ordering matters:
+## Why this isn't just "train a model"
 
-- **False positive** (page ranked high but a refresh won't help): wasted editor hours, and risk
-  of *degrading* a page that was fine — re-editing a stable, well-performing page can lose
-  existing rankings.
-- **False negative** (a page that genuinely needed attention buried low in the queue): a slow,
-  invisible decline that no one gets to in time.
-- Because editor time is the scarce resource, the practical cost is mostly **opportunity cost** —
-  the queue's *ordering* (Precision@K near the top) matters more than a global accuracy number.
+The label is a judgment, not something recorded in the data. "Should be refreshed" doesn't exist as a column; I have to define a leakage-safe proxy like declining-with-demand or stale-and-visible, and argue it's reasonable. Picking and defending that proxy is most of the actual work. A model can only rank as well as the label lets it.
 
-## 7. Why this is not just "train a model"
+Leakage is the real risk. In notebook 02, a tree allowed to see `trend_pct` scored almost perfectly and was worthless, because it had already seen the answer. The honest pipeline validates with client-holdout so a client's pages never sit in both train and test. Getting that right matters more than which model I pick.
 
-- **The label is a judgement, not a fact.** "Should be refreshed" is not recorded in the data;
-  I have to *define* a leakage-safe proxy (e.g. declining-with-demand, or stale-and-visible) and
-  argue it is reasonable. Choosing and defending that proxy is most of the real work — a model
-  can only rank as well as the label lets it.
-- **Leakage is the main danger.** In `notebooks/02` a tree that was allowed to see `trend_pct`
-  (a future-window signal) scored near-perfectly and was useless — it had peeked at the answer.
-  The honest pipeline validates with **client-holdout** so a client's pages never sit in both
-  train and test. Guarding against this matters more than model choice.
-- **A transparent baseline may be enough.** The hand rule was competitive with the tree at some
-  cutoffs. If a readable rule ranks nearly as well, that is the better product: an editor can see
-  *why* a page is on the list. The model has to *earn* its extra complexity, and only on
-  **held-out** data.
-- **The output is a recommendation for a human, not an automated action.** The deliverable is a
-  prioritized, explainable queue that a person overrides freely — not an autonomous system.
+A readable baseline might be enough. The hand rule stayed competitive with the tree at some cutoffs, and if a rule an editor can actually read ranks nearly as well, that's the better product. The model has to earn its complexity on held-out data before it's worth shipping.
 
-## 8. Cautious framing (public-safety)
+And the output is a recommendation for a person, not an automated action. What I'm building is an explainable queue someone can override, not a system that acts on its own.
 
-- Everything here is **observational and directional**. Signals in this anonymized starter data
-  are *associated with* outcomes; I will not claim any of them is a proven Google ranking factor.
-- Findings will be reported as *observed on this sample*, with effect sizes and clear caveats,
-  never as "we proved the algorithm."
-- No client data or unsafe fields leave the analysis; only the anonymized starter dataset (and,
-  later, a mentor-approved release) is used.
+## Framing
 
-## 9. First evidence (Week-1, already in this repo)
+Everything here is observational. The signals in this anonymized sample are associated with outcomes; I won't call any of them a proven Google ranking factor. I'll report findings as observed on this sample, with effect sizes and caveats, and no client data or unsafe fields leave the analysis.
 
-From `notebooks/01`–`02` on the 30,000-row anonymized starter sample:
+## First evidence (Week 1, in this repo)
 
-- Keyword `search_volume` was **near-uncorrelated** with actual `impressions_90d` — "high search
-  volume ⇒ more traffic" did not hold here. Demand and delivered visibility are different things,
-  which is why a refresh queue should key off *delivered* performance, not intent volume.
-- Holding **position tier fixed**, most of the apparent CTR gap between content types shrank —
-  a reminder to position-adjust before reading CTR as a page-quality signal.
-- On a proper train/test split, a small decision tree still out-ranked the hand rule out-of-sample,
-  but the readable rule stayed competitive — supporting a "transparent-baseline-first" plan.
+From notebooks 01 and 02, on the 30,000-row anonymized sample:
 
-*Directional observations on a sample, not causal claims.*
+- Keyword `search_volume` was basically uncorrelated with actual `impressions_90d`. "High search volume means more traffic" didn't hold here, which is a good argument for keying the queue off delivered performance rather than intent volume.
+- Once I held position tier fixed, most of the CTR gap between content types disappeared. Worth position-adjusting before reading CTR as a quality signal.
+- On a proper train/test split the small tree still out-ranked the hand rule out of sample, but the rule stayed close. That's what pushes me toward a transparent-baseline-first plan.
+
+These are directional observations on a sample, not causal claims.
