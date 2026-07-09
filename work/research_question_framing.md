@@ -28,6 +28,8 @@ A ranked review queue: page, priority score, suggested action, reason codes, con
 
 The decision is which pages land at the top of an editor's weekly refresh list. The person acting on it is a content editor who can realistically review a handful of pages a week. They open the top of the queue and act on the reason code: refresh a stale but still-visible page, expand a thin one, protect a declining high-value one, or just keep watching. The score orders the queue. A human still decides page by page, and nothing is edited automatically.
 
+The scale is what makes the ordering the product. There are 22,006 visible pages in the starter slice. At roughly 50 reviews a week that's about 440 weeks to work through them all, so what actually matters is which pages land in the first Precision@K, not a global accuracy number.
+
 ## Cost of being wrong
 
 Editor time is the scarce resource, so the ordering is where the cost lives.
@@ -52,7 +54,8 @@ Everything here is observational. The signals in this anonymized sample are asso
 
 From notebooks 01 and 02, on the 30,000-row anonymized sample:
 
-- Keyword `search_volume` was basically uncorrelated with actual `impressions_90d`. "High search volume means more traffic" didn't hold here, which is a good argument for keying the queue off delivered performance rather than intent volume.
+- Keyword `search_volume` was basically uncorrelated with actual `impressions_90d` (correlation ≈ 0.00). "High search volume means more traffic" didn't hold here, which is a good argument for keying the queue off delivered performance rather than intent volume.
+- About 60% of visible pages are trending down, and over half of all visible impressions sit on those declining pages. The decline isn't on dead pages, it's on real traffic, which is what makes prioritizing it worth the time.
 - Once I held position tier fixed, most of the CTR gap between content types disappeared. Worth position-adjusting before reading CTR as a quality signal.
 - On a proper train/test split the small tree still out-ranked the hand rule out of sample, but the rule stayed close. That's what pushes me toward a transparent-baseline-first plan.
 
