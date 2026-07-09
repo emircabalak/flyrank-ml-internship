@@ -2,10 +2,10 @@
 
 **Applied Search Intelligence: Google Search Ranking & Discoverability**
 
-This is the starting point for the FlyRank ML Internship. You **clone it**, build your work in
-**your own public repo**, and share that repo URL with Assignment 1 — it's your workspace, your
-submission, and your portfolio all at once. Everything you build stays there; we review it all
-in one pass at the end of the track.
+This is the starting point for the FlyRank ML Internship. You **clone it into your own public
+repo** (one click — *Use this template*), build everything there, and submit that repo URL on
+each assignment in your portal — it's your workspace, your submission, and your portfolio all
+at once. The rhythm is simple: do the work, commit it, submit on the card. Done.
 
 Everything here runs on a small **anonymized** slice of real FlyRank search data. No credentials,
 no private client data, no setup headaches.
@@ -92,15 +92,16 @@ live, so they always reflect the current data and environment.
 - Frame every result as **observed / measured / directional / decision-support** — never
   "I predicted Google's algorithm."
 
-The `.gitignore` blocks datasets by default, and grading checks that no dataset was committed.
+The `.gitignore` blocks datasets by default, and CI fails any commit that includes a dataset.
 
 ---
 
 ## Assignments & schedule
 
-Weekly assignments, live events, and the capstone rubric live on the **InternHQ board** at
-`internhq.flyrank.ai` (your enrollment email has your access). This repo is the shared technical
-foundation they all build on.
+Weekly assignments, live events, and the capstone live on **your portal board** (your
+enrollment email has your access link). This repo is the shared technical foundation they all
+build on — and the `skills/` folder here is the instruction library for your AI assistant
+(start at [skills/README.md](skills/README.md)).
 
 **First time with GitHub?** You need exactly four things (full walkthrough: [SETUP.md](SETUP.md)):
 1. A free account at github.com.

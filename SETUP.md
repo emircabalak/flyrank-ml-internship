@@ -7,7 +7,7 @@ You do **not** need everything on day one. There are exactly two setup moments i
 | Before Assignment 1 (Week 1) | GitHub + Colab | ~5 min |
 | Before Week 3 | Hugging Face data access | ~5 min |
 
-Do each one right before you need it. Every step below includes the mistake that silently
+Do each one right before you need it — with ONE exception worth doing on day one: create your free Hugging Face account and request access to the [internship warehouse dataset](https://huggingface.co/datasets/FlyRank/internship-warehouse) now. Approval is instant, and the data will already be waiting when Week 3 needs it (the token itself stays a Moment-2 job). Every step below includes the mistake that silently
 breaks it — read the ⚠️ lines even if you skip everything else.
 
 ---

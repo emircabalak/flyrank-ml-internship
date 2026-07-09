@@ -83,7 +83,7 @@ artifacts don't.**
 turn" cells (save copies to your repo). Capstone and lane work: **yes** — your own notebooks in
 `work/notebooks/`, starting with the setup cell from section 5.
 
-Weekly assignments, live events, and the grading rubric live on the **InternHQ board** —
+Weekly assignments, live events, and every "what done looks like" live on your **portal board** —
 this repo is the technical foundation they all build on.
 
 ## 5. Build & submit flow
@@ -104,14 +104,27 @@ this repo is the technical foundation they all build on.
    `getpass` or Colab's Secrets (🔑) panel; leaked tokens get auto-revoked, but don't test it.
 4. Keep CI green: it re-runs the pipeline and **fails if any dataset CSV is committed** —
    your fork inherits that protection.
-5. Review happens **once, at the end of the track**: after your capstone we go through every
-   assignment and the capstone in one pass and send you feedback. You revise, we re-check —
-   there are no weekly submissions in between.
+5. Submitting is simple: for every assignment you submit **your repo URL** on its card in your
+   portal — and at the end you submit the capstone the same way, with your deployed paper's URL
+   in `submission/paper_url.txt` inside the repo. That's the whole journey.
 
 Working in Colab? *File → Save a copy in GitHub* (into your repo) after each session, and
 *File → Save a copy in Drive* so the session doesn't evaporate.
 
-## 6. FAQ — the five questions everyone asks
+## 6. Working with an AI assistant
+
+This repo ships its own **skill library** for AI coding assistants (Claude Code, Cursor, Codex,
+ChatGPT — any of them). Start every task by telling your assistant:
+
+> Read `skills/README.md`, then load the ONE skill this assignment names on its card.
+
+The router in `skills/README.md` maps every task to its skill. Load one skill at a time — never
+all of them (your assistant's memory is small, and stuffing it makes it worse, not better).
+Using a chat-only assistant in the browser? Open the skill file on GitHub and paste its content
+into your chat first. Repo-reading agents find the router automatically through `AGENTS.md` and
+`CLAUDE.md` at the repo root.
+
+## 7. FAQ — the five questions everyone asks
 
 **Git won't add my results / my CSV.**
 By design — see section 3. Generated artifacts regenerate; datasets never enter git. Your
