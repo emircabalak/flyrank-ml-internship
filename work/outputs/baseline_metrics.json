@@ -1,0 +1,17 @@
+{
+  "rule": "ctr_fix",
+  "reason_code": "low_ctr_for_position",
+  "action": "rewrite_title_meta",
+  "candidates_scored": 7393,
+  "good_position_visible": 15069,
+  "expected_ctr_by_tier": {
+    "page_1": 0.23,
+    "striking": 0.15,
+    "top_3": 0.19
+  },
+  "signal_checks": {
+    "ctr_vs_position": "CONFIRMED",
+    "staleness_vs_decline": "MIXED"
+  },
+  "score_max": 53117.5
+}
