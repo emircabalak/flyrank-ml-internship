@@ -1,0 +1,64 @@
+{
+  "dev_seeds": {
+    "base_auc": 0.6033,
+    "base_p50": 0.824,
+    "widen_auc": 0.6242,
+    "widen_p50": 0.855,
+    "dauc": 0.021,
+    "wins": 9
+  },
+  "fresh_seeds": {
+    "base_auc": 0.6042,
+    "base_p50": 0.823,
+    "widen_auc": 0.6299,
+    "widen_p50": 0.833,
+    "dauc": 0.0257,
+    "wins": 11
+  },
+  "lockbox": {
+    "base_auc": 0.6664,
+    "base_p50": 0.76,
+    "widen_auc": 0.6677,
+    "widen_p50": 0.84
+  },
+  "permutation_control_auc": 0.4783,
+  "final_config": {
+    "population": "widen_all",
+    "target": "binary",
+    "num_impute": "zero",
+    "num": [
+      "content_age_days",
+      "days_since_last_update",
+      "word_count",
+      "char_count",
+      "search_volume",
+      "competition",
+      "cpc",
+      "impressions_prev_30d",
+      "clicks_prev_30d",
+      "sessions_prev_30d"
+    ],
+    "derived": [],
+    "log1p_prev": true,
+    "log1p_extra": [],
+    "missing_flags": [
+      "search_volume",
+      "word_count"
+    ],
+    "cats": [
+      "content_type",
+      "main_intent",
+      "competition_level"
+    ],
+    "encoder": "onehot",
+    "scaler": "standard",
+    "selection": null,
+    "sample_weight": null,
+    "model": "logreg",
+    "model_params": {
+      "class_weight": "balanced",
+      "max_iter": 2000,
+      "C": 1.0
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "clients": [
+    "client_2c624232cd",
+    "client_6208ef0f77",
+    "client_624b60c58c",
+    "client_a88a7902cb",
+    "client_bdd2d3af3a",
+    "client_e629fa6598"
+  ],
+  "seed": 20260715,
+  "rows": 5284,
+  "base_rate": 0.605
+}
