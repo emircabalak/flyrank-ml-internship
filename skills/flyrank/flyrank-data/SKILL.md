@@ -34,7 +34,7 @@ content item, 32 clients, trailing-90-day metrics. Full column reference: `docs/
 | `dim_clients` | 104 | one per pseudonymized client |
 | `dim_content` | 519,606 | one per content item |
 | `fact_content_daily_performance` | 78,835,655 | report_date × client × content (partitioned by month) |
-| `fact_content_daily_performance_sample` | ~11.7M | same grain — USE THIS FOR ITERATION |
+| `fact_content_daily_performance_sample` | ~11.7M | same grain — the FINAL MONTH (June 2026) only; fine for query mechanics, NEVER for label logic |
 | `fact_content_query_90d` | 2,414,248 | client × content × query hash, fixed 90-day window |
 
 Dates: 2025-01-27 → 2026-06-30 (~17 months). Position column is `gsc_avg_position`.
@@ -49,9 +49,12 @@ Dates: 2025-01-27 → 2026-06-30 (~17 months). Position column is `gsc_avg_posit
   `SUM()`. Its 90-day window overlaps the snapshot's final months — if your label lives in the
   last 30 days, only `*_prev30`-style columns are safe features (window alignment first!).
 
-**Access + iteration rules:** request gate access once (instant), READ token via getpass or
-Colab Secrets — never pasted in a cell (public repo!). Iterate on the `_sample` table or one
-month partition; run the full 79M scan ONCE when the query is final and cache the result to
+**Access + iteration rules:** request gate access once (instant), READ token via Colab
+Secrets (`HF_TOKEN`) or env var — never pasted in a cell (public repo!). Iterate on a
+**mid-panel month partition** (e.g. `month=2026-03`), not the `_sample`: the `_sample` is the
+panel's LAST month, i.e. the natural outcome window of any past→future label — develop label
+logic there and you are developing inside your own test window. Treat the final month as a
+sealed test month. Run the full 79M scan ONCE when the query is final and cache the result to
 `work/outputs/`. Repeated full scans hit HTTP 429 rate limits.
 
 ## How to verify

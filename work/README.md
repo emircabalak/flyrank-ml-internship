@@ -11,7 +11,9 @@ report. The rest of the repo is the shared reference; this folder is yours.
    baseline you compare against, and reviewers expect to find it unchanged.
 2. **No datasets in git.** CSVs inside `work/` are gitignored, and CI fails if any dataset
    CSV is committed anywhere in the repo. Small summary tables belong in your report as
-   markdown, not as data files.
+   markdown, not as data files. Metrics JSONs are the opposite: keep files like
+   `work/outputs/*.json` **committed** — they are the receipts your report's numbers trace
+   back to. Don't add ignore rules that hide them.
 3. **Stay reproducible.** Fix your random seeds and note them in your report. Someone with a
    fresh clone should be able to re-run your work from your instructions alone.
 4. **Public-safety language.** Everything here may end up public with your submission:
@@ -36,19 +38,23 @@ mirrors the eight axes your work is graded on, so writing it early keeps you hon
 ## Your assignment index
 
 Your skeleton notebooks are already in `notebooks/` — one per assignment, pre-named.
-Tick them off as you go; this table is the map of your work:
+Tick them off as you go; this table is the map of your work (each badge opens the notebook
+in Colab, straight from your repo):
 
-| Notebook | Assignment | Status |
-|---|---|---|
-| `notebooks/w01_research_question.ipynb` | ML-02 | ☐ |
-| `notebooks/w02_ml_task_framing.ipynb` | ML-03 | ☐ |
-| `notebooks/w03_data_contract.ipynb` | ML-04 | ☐ |
-| `notebooks/w03_feature_leakage_check.ipynb` | ML-05 | ☐ |
-| `notebooks/w04_signal_audit.ipynb` | ML-06 | ☐ |
-| `notebooks/w04_baseline_score.ipynb` | ML-07 | ☐ |
-| `notebooks/w05_model.ipynb` | ML-08 | ☐ |
-| `notebooks/w06_validation_audit.ipynb` | ML-09 | ☐ |
-| `notebooks/w07_action_playbook.ipynb` | ML-10 | ☐ |
-| `notebooks/capstone.ipynb` | ML-11 (the paper mirrors it) | ☐ |
+| Notebook | Assignment | Open | Status |
+|---|---|---|---|
+| `notebooks/w01_research_question.ipynb` | ML-02 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/work/notebooks/w01_research_question.ipynb?flush_cache=true) | ☐ |
+| `notebooks/w02_ml_task_framing.ipynb` | ML-03 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/work/notebooks/w02_ml_task_framing.ipynb?flush_cache=true) | ☐ |
+| `notebooks/w03_data_contract.ipynb` | ML-04 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/work/notebooks/w03_data_contract.ipynb?flush_cache=true) | ☐ |
+| `notebooks/w03_feature_leakage_check.ipynb` | ML-05 — optional stretch (card retired 2026-07-13; its core lives in ML-04 now) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/work/notebooks/w03_feature_leakage_check.ipynb?flush_cache=true) | optional |
+| `notebooks/w04_signal_audit.ipynb` | ML-06 — optional stretch (card retired 2026-07-13; its core lives in ML-07 now) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/work/notebooks/w04_signal_audit.ipynb?flush_cache=true) | optional |
+| `notebooks/w04_baseline_score.ipynb` | ML-07 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/work/notebooks/w04_baseline_score.ipynb?flush_cache=true) | ☐ |
+| `notebooks/w05_model.ipynb` | ML-08 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/work/notebooks/w05_model.ipynb?flush_cache=true) | ☐ |
+| `notebooks/w06_validation_audit.ipynb` | ML-09 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/work/notebooks/w06_validation_audit.ipynb?flush_cache=true) | ☐ |
+| `notebooks/w07_action_playbook.ipynb` | ML-10 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/work/notebooks/w07_action_playbook.ipynb?flush_cache=true) | ☐ |
+| `notebooks/capstone.ipynb` | ML-11 (the paper mirrors it) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/work/notebooks/capstone.ipynb?flush_cache=true) | ☐ |
+| closing section of `notebooks/capstone.ipynb` | ML-12 — 5-min demo outline + social-post cut + employer-facing summary | (same notebook, last markdown cells) | ☐ |
 
 When your paper is deployed, put its exact URL in `../submission/paper_url.txt` (one line).
+ML-12 lives in your capstone notebook's closing markdown cells — it's the smallest card and
+the easiest to forget, which is exactly why it has a row here.

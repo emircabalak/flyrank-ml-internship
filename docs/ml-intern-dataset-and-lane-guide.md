@@ -72,7 +72,7 @@ The warehouse release, and how to get it:
 - Chunk size: 10,000 rows per CSV part
 - How it was scrambled and verified: identifiers were pseudonymized (replaced with stable scrambled codes) and the release passed its checks before publishing — the full details are in the dataset manifest on Hugging Face.
 
-> **Building features and iterating?** Develop against `fact_content_daily_performance_sample` (the latest full month, 11.7M rows) and run the full fact table only for your final pass. Hitting the full table over and over can trip Hugging Face rate limits (HTTP 429 errors).
+> **Building features and iterating?** Develop against one middle month (e.g. `month=2026-03`) and run the full fact table only for your final pass — hitting the full table over and over can trip Hugging Face rate limits (HTTP 429 errors). Avoid the `_sample` table for experiments: it holds the LAST month of data, and if your label is about "what happens next", experimenting there means peeking at the future you're supposed to predict.
 
 When you write about the data, use only the counts and date windows below — they match the release exactly.
 

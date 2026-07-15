@@ -25,6 +25,7 @@ what you may edit, how the pieces connect, and where your own work goes.
 | `docs/ml-core-foundation-framework.md` | The ML-as-a-system map behind the live sessions | Reference |
 | `docs/intern-free-tooling-guide.md` | The zero-budget tool stack | Reference |
 | `.github/workflows/smoke-test.yml` | CI: re-runs the whole pipeline and fails if any dataset CSV is committed | Keep it green |
+| `.github/workflows/personalize.yml` | Runs once right after you create your copy: points every Colab badge at YOUR repo | Automatic — nothing to do |
 | `requirements.txt` | pandas, numpy, scikit-learn, matplotlib, reportlab, duckdb, huggingface_hub | `pip install -r requirements.txt` |
 
 ## 2. How the pipeline fits together
@@ -108,8 +109,10 @@ this repo is the technical foundation they all build on.
    portal — and at the end you submit the capstone the same way, with your deployed paper's URL
    in `submission/paper_url.txt` inside the repo. That's the whole journey.
 
-Working in Colab? *File → Save a copy in GitHub* (into your repo) after each session, and
-*File → Save a copy in Drive* so the session doesn't evaporate.
+Working in Colab? *File → Save a copy in GitHub* after each session — opened from your
+copy's badges, the dialog comes pre-filled (repo, path, branch), so saving is one OK. Also
+*File → Save a copy in Drive* so the session doesn't evaporate. Badges acting up? *File →
+Open notebook → GitHub tab* → your repo — see `SETUP.md`, Moment 1.
 
 ## 6. Working with an AI assistant
 
@@ -124,7 +127,7 @@ Using a chat-only assistant in the browser? Open the skill file on GitHub and pa
 into your chat first. Repo-reading agents find the router automatically through `AGENTS.md` and
 `CLAUDE.md` at the repo root.
 
-## 7. FAQ — the five questions everyone asks
+## 7. FAQ — the questions everyone asks
 
 **Git won't add my results / my CSV.**
 By design — see section 3. Generated artifacts regenerate; datasets never enter git. Your
@@ -150,3 +153,17 @@ copy. Check `docs/data-dictionary.md` first so you don't leak the label.
 **Can I put the mentor-provided warehouse release in this repo?**
 No. It stays outside git entirely (CI fails any committed CSV anyway). Work with it locally
 and commit only code, aggregates, and write-ups — see `DATA_USE.md`.
+
+**How do I get starter fixes that ship after I made my copy?**
+Template copies share no history with the shared repo, so fixes don't arrive on their own.
+Pull them in when you want them:
+
+```bash
+git remote add upstream https://github.com/flyrank-bih/flyrank-ml-internship-starter
+git fetch upstream
+git merge upstream/main --allow-unrelated-histories
+```
+
+Badge lines will conflict (they were rewritten to point at YOUR copy) — resolve those by
+keeping yours. Everything that matters for correctness is also announced on your portal
+board, so syncing is optional, not required.
