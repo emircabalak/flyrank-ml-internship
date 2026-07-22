@@ -1,0 +1,97 @@
+{
+  "queue": {
+    "slots": 50,
+    "visible_pages_scored": 22006,
+    "prior_window_impressions_in_queue": 351897,
+    "clients_represented": 9,
+    "action_mix": {
+      "refresh the content": 19,
+      "rewrite title and meta": 15,
+      "relevance work and internal links": 14,
+      "watch only": 1,
+      "expand the page": 1
+    },
+    "archetype_mix": {
+      "maturing asset": 27,
+      "neglected earner": 23
+    }
+  },
+  "reason_code_share_all_visible": {
+    "no_clear_lever": 0.482,
+    "low_visibility": 0.253,
+    "stale_but_earning": 0.123,
+    "low_ctr_for_position": 0.122,
+    "thin_for_demand": 0.02
+  },
+  "decay_by_age_tier": {
+    "31-90": {
+      "pages": 304,
+      "share_declining": 0.681
+    },
+    "91-180": {
+      "pages": 8717,
+      "share_declining": 0.692
+    },
+    "181-365": {
+      "pages": 7650,
+      "share_declining": 0.606
+    },
+    "365+": {
+      "pages": 5335,
+      "share_declining": 0.427
+    }
+  },
+  "freshness_by_tier": {
+    "0-30": {
+      "pages": 13735,
+      "share_declining": 0.583
+    },
+    "31-90": {
+      "pages": 152,
+      "share_declining": 0.592
+    },
+    "91-180": {
+      "pages": 8084,
+      "share_declining": 0.622
+    },
+    "181+": {
+      "pages": 35,
+      "share_declining": 0.743
+    }
+  },
+  "thresholds": {
+    "stale_days_p75": 104.0,
+    "thin_word_count_p25": 2576.0,
+    "earning_impressions_p60": 835.0
+  },
+  "limits": {
+    "population_filter": "impressions_90d >= 100",
+    "visible_pages": 22006,
+    "pages_outside_population": 7994,
+    "visible_base_rate": 0.598,
+    "held_out_auc": 0.625,
+    "lockbox_p_at_50_widened": 0.84,
+    "lockbox_p_at_50_visible_train": 0.76,
+    "widening_gain_95_ci": [
+      -0.02,
+      0.12
+    ],
+    "random_split_inflation_auc": 0.06,
+    "per_client_auc_range": [
+      0.44,
+      0.82
+    ],
+    "clients_below_chance": 1
+  },
+  "monitoring": {
+    "base_rate_band": [
+      0.55,
+      0.65
+    ],
+    "current_base_rate": 0.598,
+    "realised_precision_floor_per_50": 30,
+    "current_median_risk": 0.598,
+    "has_keyword_share": 0.974,
+    "has_word_count_share": 0.702
+  }
+}
