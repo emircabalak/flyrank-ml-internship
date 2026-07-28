@@ -28,7 +28,6 @@
   figcaption { color:var(--muted); font-size:.9rem; margin-top:8px; }
   code { background:var(--panel); padding:1px 5px; border-radius:4px; font-size:.9em; }
   a { color:var(--accent); }
-  .foot { margin-top:40px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:.92rem; }
   @media (prefers-color-scheme: dark) {
     :root { --ink:#e8eaed; --muted:#9aa3af; --line:#2a2f36; --accent:#6cc39a; --bg:#14171a; --panel:#1c2024; }
   }
@@ -43,23 +42,23 @@
 
   <div class="abstract">
     <h2>Abstract</h2>
-    <p>FlyRank runs content for many clients and cannot hand-review every page, so editors need a short list of what to fix first. I framed that as a ranking problem on the anonymized internship dataset (30,000 pages, 32 clients): rank visible pages by how likely they are to be declining, using only signals knowable before the outcome. A Logistic Regression over leakage-safe features beats a fair Week-4 rule baseline on client-grouped folds, reaching Precision@50 of 0.81 against a 0.60 base rate, and widening the training data to sub-threshold pages helps the top of the queue. The result is a ranked refresh queue with a reason code per page, not a claim about Google or about whether a refresh pays off. It is decision-support for prioritizing an editor's week.</p>
+    <p>FlyRank publishes pages for many clients and cannot check every one by hand, so editors need a short list of what to fix first. I turned that into a ranking task on the anonymized internship data (30,000 pages, 32 clients): sort the visible pages by how likely each one is to be losing traffic, using only signals we would know before the drop. A plain logistic regression on those safe signals beats a fair rule-based baseline when it is tested on clients it never saw, getting about 41 of its top 50 pages right (Precision@50 of 0.81) against a base rate of 0.60. Training on the smaller pages too lifts the top of the list a little. The output is a ranked refresh list with a reason for each page. It makes no claim about Google and does not prove a refresh wins traffic back; it just helps an editor decide what to look at first.</p>
   </div>
 
   <h2>1. The problem</h2>
-  <p>A FlyRank editor owns hundreds of live pages and has time for maybe fifty reviews a month. The hard part is not writing the fix, it is choosing which pages deserve one. Guess wrong upward and you rewrite a page that was fine, burning hours and risking rankings it already had. Guess wrong downward and a page keeps slipping while nobody looks. That choice is the whole case study here: turn a pile of pages into an ordered queue an editor can trust, with a reason attached to each row.</p>
-  <p>One row is one content page. The output is a ranked queue with a reason code and a suggested action. The person acting is an editor working the top of the list. Ranking is worth automating because the signals that hint at decline are many and tangled, and no single hand rule orders them well. The final call still belongs to a person.</p>
+  <p>A FlyRank editor looks after hundreds of live pages and has time to review maybe fifty a month. The hard part is not writing the fix, it is picking which pages deserve one. Fix a page that was fine and you waste hours and risk the ranking it already had. Miss a page that is slipping and it keeps losing traffic while no one notices. That choice is the whole case study here: take a pile of pages and turn it into an ordered list an editor can trust, with a reason next to each one.</p>
+  <p>One row is one page. The output is a ranked list with a reason and a suggested action. The person using it is an editor working from the top down. This is worth automating because the hints that a page is slipping are many and mixed together, and no single hand-written rule sorts them well. The final call still belongs to a person.</p>
 
   <h2>2. Data</h2>
-  <p>The model, baseline, and validation run on the 30,000-row anonymized starter slice that ships in the repo: one row per page, 32 pseudonymized clients, metrics over a trailing 90-day window. Keeping the work on the committed slice means anyone can rerun it without gated access. My data contract verified the same lane on the full warehouse release, the March 2026 partition of roughly 9.8 million page-days, to confirm the grain and windows hold at scale.</p>
-  <p>What I left out matters more than what I kept. The label is derived from <code>trend_direction</code>, so that column, <code>trend_pct</code>, and the derived label never enter the features. The 90-day and last-30-day windows overlap the label's own window, so they are excluded as features too; only the earlier <code>*_prev_30d</code> window and static page properties are fair game. Pseudonymous IDs group and split the data, never train it. No client names, domains, URLs, or raw queries appear anywhere.</p>
+  <p>The model, the baseline, and the testing all run on the 30,000-row anonymized slice that ships in the repo: one row per page, 32 disguised clients, numbers over the last 90 days. Keeping the work on that committed slice means anyone can rerun it without special access. My data contract checked the same setup on the full warehouse release, the March 2026 slice of about 9.8 million page-days, to make sure the shape holds at scale.</p>
+  <p>What I left out matters more than what I kept. The label comes from the <code>trend_direction</code> column, so that column and everything built from it stay out of the features. The 90-day and last-30-day numbers overlap the label's own window, so they are out too; only the earlier 30-day window and fixed page facts are fair to use. The client and page IDs are only for grouping and splitting, never for training. No client names, domains, links, or real search queries appear anywhere.</p>
 
   <h2>3. Methodology</h2>
-  <p>The label is a proxy: a page counts as declining when <code>trend_direction == "down"</code>. It is a defined stand-in for "worth a refresh slot", not a measured business outcome, and I treat it that way throughout.</p>
-  <p>The baseline is the transparent CTR-fix rule I built in Week 4, scored here as a decline ranker on the same folds, with a naive staleness ranker as a floor. The model is Logistic Regression over the leakage-safe features. An exhaustive search under <code>work/experiments/</code> compared twelve model families; trees and boosters ranked worse at the top of the queue, and the only durable gain was widening the training population to include sub-threshold pages while still scoring only visible ones. Validation is client-grouped 5-fold, so no client sits in both train and test. Every number below is out-of-fold on unseen clients, with the base rate beside it.</p>
+  <p>The label is a stand-in, not a real business result: a page counts as slipping when its <code>trend_direction</code> reads "down". I treat it as a proxy for "worth a refresh slot" and nothing more.</p>
+  <p>The baseline is the simple CTR-fix rule from Week 4, scored here as a way to rank slipping pages, plus a plain "how stale is it" ranker as a floor. The model is logistic regression on the safe signals. A wide search under <code>work/experiments/</code> compared twelve model types; the fancier trees and boosters did worse at the top of the list, and the only change that reliably helped was training on the smaller pages too while still scoring only the visible ones. Testing is 5-fold grouped by client, so no client shows up in both training and testing. Every number below is measured on clients the model never saw, with the base rate right beside it.</p>
 
   <h2>4. Results</h2>
-  <p>Same visible pages, same client-grouped folds, same metrics. The model beats both baselines, and widening the training data edges the top of the queue further. Base rate for declining pages is 0.598.</p>
+  <p>Same visible pages, same client-grouped folds, same measures. The model beats both baselines, and training on the smaller pages pushes the top of the list up a bit more. The base rate for slipping pages is 0.598.</p>
   <table>
     <thead><tr><th>Method</th><th class="num">ROC-AUC</th><th class="num">Precision@50</th></tr></thead>
     <tbody>
@@ -69,31 +68,31 @@
       <tr class="win"><td>Logistic Regression (widened-train)</td><td class="num">0.637</td><td class="num">0.808</td></tr>
     </tbody>
   </table>
-  <p>The lift over the CTR-fix baseline is real but modest, about 1.35x on Precision@50, not the 3x a weak baseline would manufacture. That restraint is deliberate: the fair comparison is against the best transparent rule I could build, not a strawman.</p>
+  <p>The gain over the CTR-fix baseline is real but small, about 1.35 times on Precision@50, not the 3 times a weak baseline would make it look. That restraint is the point: I compare against the best simple rule I could build, not an easy target.</p>
 
   <figure>
-    <img src="img/decline_by_age_and_freshness.png" alt="Decline share by content age and by days since last update">
-    <figcaption>Older pages are steadier, not stalest: pages past a year decline far less often (0.43) than pages three to six months old (0.69). Dashed line is the base rate.</figcaption>
+    <img src="img/decline_by_age_and_freshness.png" alt="Share of pages declining, by content age and by days since last update">
+    <figcaption>Older pages hold up better, they are not the stalest: pages over a year old slip far less often (0.43) than pages three to six months old (0.69). The dashed line is the base rate.</figcaption>
   </figure>
 
   <h2>5. Limitations and honest framing</h2>
-  <p>Leakage is easy here and I refused it. Adding the label's own time window drives AUC toward a fake ceiling: honest features sit at 0.63, adding the 90-day window pushes it to 0.70, and adding the last-30-day window jumps it to 0.95, with the raw trend column reaching 0.997. The gap between 0.63 and 0.95 is the difference between an honest model and one that has read the answer.</p>
-  <p>A random split also flatters the model. The same pipeline scores 0.685 AUC when clients leak across the split versus 0.607 on held-out clients, and that 0.078 gap is memorization, not skill.</p>
-  <p>Most important, decision value is not proven. The model ranks declining pages above the base rate, but whether refreshing them recovers traffic is an intervention question that needs an A/B test this observational snapshot cannot run. The widening gain also carries a wide bootstrap interval across the sealed lockbox clients, so it is directional, not measured. Read this as decision-support for an editor's queue, nothing more, and never as a claim about Google's algorithm or the causal payoff of a refresh.</p>
+  <p>Three honest limits. First, cheating is easy here and I said no to it. The moment you feed the model the label's own time window, the score shoots toward a fake 0.9 and up: honest signals sit at 0.63, adding the 90-day window makes it 0.70, and adding the last-30-day window jumps it to 0.95. The gap between 0.63 and 0.95 is the difference between an honest model and one that has already seen the answer.</p>
+  <p>Second, a random split makes the model look better than it is. The same setup scores 0.685 when clients leak across the split versus 0.607 on clients held out, and that 0.078 gap is memorizing, not skill.</p>
+  <p>Third, and most important, this does not prove a refresh works. The model sorts slipping pages above the base rate, but whether fixing them actually wins traffic back is a different question that needs a real test this snapshot cannot run. The gain from training on smaller pages also has a wide error range, so read it as a hint, not a settled number. This is a tool to help an editor choose what to look at, and nothing more.</p>
 
   <h2>6. Ranked recommendations</h2>
-  <p>The queue turns scores into moves an editor can make tomorrow. Each of the top fifty pages gets one action and one reason code. The mix leans on refreshing content and rewriting titles, with a smaller share for relevance and internal-link work.</p>
+  <p>The list turns scores into moves an editor can make tomorrow. Each of the top fifty pages gets one action and one reason. Most of the list is refreshing content and rewriting titles, with a smaller share for relevance and internal-link work.</p>
   <figure>
-    <img src="img/queue_action_mix.png" alt="Action mix of the top 50 pages in the refresh queue">
-    <figcaption>Top-50 queue: 19 pages flagged to refresh, 15 to rewrite title and meta, 14 for relevance and internal links, and a couple to watch or expand.</figcaption>
+    <img src="img/queue_action_mix.png" alt="Action mix of the top 50 pages in the refresh list">
+    <figcaption>Top 50 list: 19 pages to refresh, 15 to rewrite the title and description, 14 for relevance and internal links, and a couple to watch or expand.</figcaption>
   </figure>
-  <p>The reason codes are honest about their own coverage. For nearly half of visible pages (48%) the rule finds no clear lever and says so, rather than inventing one; the rest split across low visibility (25%), stale-but-earning (12%), and low CTR for position (12%). Two archetypes dominate the queue: maturing assets that are slipping, and neglected earners that pull traffic but get no attention.</p>
+  <p>The reasons are honest about where they run out. For nearly half of visible pages (48%) the rule finds no clear lever and says so, instead of making one up; the rest split across low visibility (25%), stale but still earning (12%), and low CTR for the position (12%). Two kinds of page fill the list: solid pages that are starting to slip, and quiet earners that pull traffic but get no attention.</p>
 
   <h2>7. Reproducibility</h2>
-  <p>Everything reruns from a fresh clone. The capstone notebook (<code>work/notebooks/capstone.ipynb</code>) regenerates every number and both charts on the committed data slice; the weekly notebooks (<code>w01</code> through <code>w07</code>) hold each step, and the exhaustive model search lives under <code>work/experiments/</code> with its ledger and sealed lockbox. Splits use fixed seeds. See the <a href="https://github.com/emircabalak/flyrank-ml-internship">repository</a> for the code and the environment.</p>
+  <p>Everything reruns from a fresh clone. The capstone notebook (<code>work/notebooks/capstone.ipynb</code>) rebuilds every number and both charts on the committed data. The weekly notebooks (<code>w01</code> through <code>w07</code>) hold each step, and the full model search sits under <code>work/experiments/</code> with its log and sealed test set. Splits use fixed seeds. The code and setup are in the <a href="https://github.com/emircabalak/flyrank-ml-internship">repository</a>.</p>
 
   <h2>8. Acknowledgments and data credit</h2>
-  <p>Built on the FlyRank ML Internship dataset. Learn more at <a href="https://flyrank.ai">flyrank.ai</a>. Crediting the data source is standard research practice, and it tells readers this is real production search data, used in anonymized form.</p>
+  <p>Built on the FlyRank ML Internship dataset. Learn more at <a href="https://flyrank.ai">flyrank.ai</a>. Naming the data source is standard practice, and it tells readers this is real search data, used in disguised form.</p>
 
 </main>
 </body>
