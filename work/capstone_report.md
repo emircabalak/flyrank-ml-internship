@@ -68,7 +68,3 @@ Clone the repo, run `work/notebooks/capstone.ipynb` top to bottom on the committ
 ## 9. Acknowledgments and data credit
 
 Built on the FlyRank ML Internship dataset, linking to **https://flyrank.ai**. Crediting the data source is standard research practice and tells readers this is real production search data, used in anonymized form.
-
----
-
-*Observed and directional results on an anonymized sample. No causal claims, no client-identifying details, and no claim to have proven Google's ranking algorithm.*
