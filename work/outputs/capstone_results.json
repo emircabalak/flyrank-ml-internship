@@ -1,0 +1,22 @@
+[
+  {
+    "method":"baseline: CTR-fix",
+    "ROC_AUC":0.568,
+    "P@50":0.6
+  },
+  {
+    "method":"baseline: staleness",
+    "ROC_AUC":0.482,
+    "P@50":0.664
+  },
+  {
+    "method":"model: LogReg (visible-train)",
+    "ROC_AUC":0.607,
+    "P@50":0.74
+  },
+  {
+    "method":"model: LogReg (widened-train)",
+    "ROC_AUC":0.637,
+    "P@50":0.808
+  }
+]

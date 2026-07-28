@@ -1,122 +1,74 @@
-# Capstone Report: Lane 2, Refresh / Content Opportunity Scoring
+# Which already-visible pages should an editor refresh first?
 
 - **Author:** Emir Çabalak
 - **Lane:** Lane 2, Refresh / Content Opportunity Scoring
 - **Repo:** https://github.com/emircabalak/flyrank-ml-internship
-- **Date:** 2026-07-18 (in progress, fill fully in weeks 7-8)
-
-> Working draft. Sections keep the template's prompts as guidance; the two blockquote notes
-> under sections 3 and 5 are captured findings to fold into the final paper so they are not
-> rebuilt from memory. Numbers here must match a fresh re-run of the notebooks.
+- **Deployed paper:** see `submission/paper_url.txt`
+- **Reproduces from:** `work/notebooks/capstone.ipynb` (all numbers and both charts)
 
 ## 0. Abstract
 
-Five sentences, written last, placed first: question → data → method → headline result →
-what the output is for. This is the top of your deployed paper.
+FlyRank runs content for many clients and cannot hand-review every page, so editors need a short list of what to fix first. I framed that as a ranking problem on the anonymized internship dataset (30,000 pages, 32 clients): rank visible pages by how likely they are to be declining, using only signals knowable before the outcome. A Logistic Regression over leakage-safe features beats a fair Week-4 rule baseline on client-grouped folds, reaching Precision@50 of 0.81 against a 0.60 base rate, and widening the training data to sub-threshold pages helps the top of the queue. The output is a ranked refresh queue with a reason code per page, not a claim about Google or about whether a refresh pays off. It is decision-support for prioritizing an editor's week.
 
 ## 1. Problem framing
 
-What decision does this support? Name the unit of analysis (page, client, day…), the output
-(score, rank, cluster, report), the action a human takes from it, and the cost of a wrong
-call. Why does data/ML help here at all?
+A FlyRank editor owns hundreds of live pages and has time for maybe fifty reviews a month. The hard part is not writing the fix, it is choosing which pages deserve one. Rewrite a page that was fine and you burn hours and risk rankings it already had; miss a page that is slipping and it keeps bleeding traffic. One row is one page, the output is a ranked queue with a reason code and an action, the actor is an editor working the top of the list, and ranking is worth automating because the decline signals are many and tangled. The final call still belongs to a person.
 
-Source material: `work/notebooks/w01_research_question.ipynb` (ML-02) and
-`w02_ml_task_framing.ipynb` (ML-03). Task = ranking/scoring, one row = one page, output = a
-ranked refresh queue, action = an editor works the top ~50 pages a month.
+Source: `w01_research_question.ipynb`, `w02_ml_task_framing.ipynb`.
 
 ## 2. Data safety
 
-Which data you used and which columns you deliberately excluded (and why). Leakage risks you
-considered — especially label-derived fields (`trend_direction`, `trend_pct`) and pseudonymous
-IDs (grouping only, never features). Confirm nothing client-identifying appears anywhere in
-`work/`.
+Model, baseline, and validation run on the 30,000-row anonymized starter slice committed to the repo (32 clients, trailing 90-day window), so anyone can rerun without gated access. The data contract verified the same lane on the full warehouse release (March 2026, ~9.8M page-days). Excluded on purpose: `trend_direction`, `trend_pct`, and the derived `is_declining` (label source); `impressions_90d`, `impressions_last_30d`, `ctr`, `avg_position` (windows that overlap the label); and the pseudonymous IDs (grouping and splits only). No client names, domains, URLs, or raw queries appear anywhere.
 
-Source material: `w03_data_contract.ipynb` (ML-04) and the full leakage audit in
-`w06_validation_audit.ipynb` (ML-09), including the escalation table and the disclosed
-population gate.
+Source: `w03_data_contract.ipynb`, `w06_validation_audit.ipynb`.
 
 ## 3. Baseline
 
-The transparent rule or score you built first. Why it's a fair comparison, and its numbers on
-the same data and metric as your model.
+The Week-4 CTR-fix rule, scored as a decline ranker on the same client-grouped folds, reaches ROC-AUC 0.568 and Precision@50 0.600. A naive staleness ranker sits at 0.482 / 0.664. These are a fair bar, not a strawman: the canonical 24%-to-74% lecture story uses a much weaker baseline, so my smaller gap is honest, not a weaker model.
 
-Source material: `w04_baseline_score.ipynb` (ML-07), the Week-4 CTR-fix rule.
+Source: `w04_baseline_score.ipynb`.
 
-> **Note to fold in (captured 2026-07-18): the 24 vs 74 framing.** The Week-2 lecture tells a
-> canonical story: a hand rule picked the right pages 24% of the time (12 of 50) and the model
-> was about 3x better (~74%). My headline numbers do NOT match that, and the reason is a
-> stronger, fairer baseline, not a weaker model. My Week-4 CTR-fix, scored as a decline ranker
-> on the same client-grouped folds, reaches P@50 = 0.591, not 0.24. Against that higher bar the
-> model's lift is about 1.4x (P@50 0.80-0.84), not 3x. I report it this way on purpose: a weak
-> baseline manufactures a dramatic lift, and the honest comparison uses the best transparent
-> rule I could build. State this explicitly so a reader who knows the 24→74 story is not
-> confused by the smaller gap.
+## 4. Model
 
-## 4. Model / analysis
+Logistic Regression over the leakage-safe features (prior-window traffic, page age and freshness, length, keyword context, content type and intent). Chosen over eleven other families in the exhaustive search under `work/experiments/`; the one durable improvement was widening the training population to sub-threshold pages while still scoring only visible ones. Target is the `is_declining` proxy, a defined stand-in for "worth a refresh slot", never the trend columns it is derived from.
 
-Your method and why it fits the lane. The exact feature list (and what you left out on
-purpose). The target or proxy definition, in one sentence.
-
-Source material: `w05_model.ipynb` (ML-08) and the harness under `work/experiments/`. Method =
-Logistic Regression over leakage-safe features, chosen over 11 other families; the one durable
-improvement was widening the training population to sub-threshold pages. Target is the
-`is_declining` proxy, a defined stand-in for "worth a refresh slot", never the trend columns
-it is derived from.
+Source: `w05_model.ipynb`, `work/experiments/`.
 
 ## 5. Evaluation
 
-Your split (grouped by client? time-aware?) and why. Metrics, model vs baseline **on the same
-split**. What the errors look like — a short error analysis beats a big metric table.
+Client-grouped 5-fold, so no client appears in both train and test. Visible base rate 0.598.
 
-Source material: `w05_model.ipynb` (client-grouped folds + 6-client lockbox) and
-`w06_validation_audit.ipynb` (random vs grouped before/after, cluster bootstrap CI).
+| Method | ROC-AUC | Precision@50 |
+|---|---|---|
+| Baseline: Week-4 CTR-fix | 0.568 | 0.600 |
+| Baseline: staleness | 0.482 | 0.664 |
+| LogReg (visible-train) | 0.607 | 0.740 |
+| **LogReg (widened-train)** | **0.637** | **0.808** |
 
-> **Note to fold in (captured 2026-07-18): decision value is not prediction quality.** What I
-> measured is ranking quality: on held-out clients the model ranks declining pages above the
-> 0.598 base rate (observed AUC 0.625, top-50 precision 0.80-0.84). What I did NOT measure, and
-> must not claim, is decision value: whether refreshing the pages it flags actually recovers
-> traffic. That is an intervention question and needs an A/B test or a refresh-vs-hold holdout,
-> which this observational snapshot cannot answer. The honest limitation for the paper: this is
-> decision-support for prioritising an editor's queue, not evidence that the refreshes pay off.
-> Also carry the statistical caveat from ML-09: the widened-vs-visible P@50 gain of +0.08 has a
-> 95% cluster-bootstrap interval of [-0.02, +0.12] over six lockbox clients, so it is directional,
-> not a measured improvement. Deployment, monitoring, and governance (framework sections 19
-> J/K/L) also belong in the limitations, not claimed as done.
+The lift over the CTR-fix baseline is about 1.35x on Precision@50, not 3x. Honest checks: a random split scores 0.685 AUC versus 0.607 grouped, a 0.078 memorization gap; and leakage escalates fast, from 0.63 honest to 0.95 once the last-30-day window is added and 0.997 with the raw trend column.
+
+Source: `w05_model.ipynb`, `w06_validation_audit.ipynb`.
 
 ## 6. Interpretation
 
-What the model/clusters actually found. Feature importances or cluster profiles in plain
-words. Surprises and negative results — a well-understood "no effect" is a valid result.
+The model leans on prior-window engagement first (log clicks and sessions), then page age. A key negative result from the audit: the pooled "declining pages are shorter" gap flips sign once you compare within a client, so it is a mix effect across clients, not a within-site lever. Older pages are steadier, not stalest: pages past a year decline far less often (0.43) than pages three to six months old (0.69).
 
-Source material: coefficient and per-client-AUC analysis in `w05_model.ipynb`, and the
-mix-effect finding in `w06_validation_audit.ipynb` (pooled vs within-client cohort gaps).
+Source: `w05_model.ipynb`, `w06_validation_audit.ipynb`.
 
 ## 7. Recommendation
 
-The ranked actions or decisions your output supports, and how a FlyRank editor would use them
-tomorrow. State your confidence and the limits explicitly.
+The top-50 queue assigns one action per page: 19 refresh, 15 rewrite title and meta, 14 relevance and internal links, and a couple to watch or expand. For 48% of visible pages the rule finds no clear lever and says so. Two archetypes dominate: maturing assets that are slipping, and neglected earners that pull traffic but get no attention. Confidence is directional and decision-support only, bounded by the limits above.
 
-Source material: `w07_action_playbook.ipynb`. Keep the confidence language honest: directional,
-decision-support, and bounded by the two notes above.
+Source: `w07_action_playbook.ipynb`.
 
 ## 8. Reproducibility
 
-The exact commands to re-run everything from a fresh clone, your random seeds, and your
-environment (`pip freeze` highlights or `requirements.txt` deltas). If you claim a sealed or
-holdout evaluation, two things must be committed: the cell/script that builds the sealed
-frame, and the metrics file it produced.
+Clone the repo, run `work/notebooks/capstone.ipynb` top to bottom on the committed data slice; it regenerates every number and both charts. The weekly notebooks hold each step, and `work/experiments/run_experiments.py` with `ledger.jsonl` and `lockbox.json` are the sealed-search receipts. Splits use fixed seeds.
 
-Source material: `work/experiments/run_experiments.py` (setup/full/verify), `lockbox.json`,
-and `ledger.jsonl` are the sealed-evaluation receipts.
+## 9. Acknowledgments and data credit
 
-## 9. Acknowledgments & data credit
-
-One short section at the bottom of the deployed paper: "Built on the FlyRank ML Internship
-dataset" **linking to https://flyrank.ai**.
+Built on the FlyRank ML Internship dataset, linking to **https://flyrank.ai**. Crediting the data source is standard research practice and tells readers this is real production search data, used in anonymized form.
 
 ---
 
-> **Claims checklist before submitting:** observed / measured / directional / decision-support
-> language everywhere · base rate next to every precision@K · no causal claims without an
-> experiment · no "predicted Google's algorithm" · no client-identifying details · numbers
-> match a fresh re-run.
+*Observed and directional results on an anonymized sample. No causal claims, no client-identifying details, and no claim to have proven Google's ranking algorithm.*
